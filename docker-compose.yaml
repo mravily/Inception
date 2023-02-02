@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  webapp:
+    container_name: wordpress
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    links:
+      - database
+  server:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - webapp
+    restart: always
+  database:
+    container_name: mariadb
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile
+    volumes:
+      - database:/var/lib/mysql
+      - ./db-data:/var/lib/mysql
+    restart: always
+
+volumes:
+  database:
+    name: wp_db
