@@ -28,5 +28,7 @@ RUN chown -R www-data:www-data /usr/share/webapps/wordpress && \
 
 WORKDIR /usr/share/webapps/wordpress
 
+COPY config/wp-config.php .
+
 #Launch PHP FPM in foreground and ignore deamonize from conf file (-F)
-CMD ["/usr/sbin/php-fpm81", "-F"]
+# CMD ["/usr/sbin/php-fpm81", "-F"]
