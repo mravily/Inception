@@ -1,35 +1,60 @@
 version: "3.9"
 services:
-  webapp:
+  web_app:
     container_name: wordpress
     build:
       context: ./wordpress
       dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ${PATH_DATA}/web_data:/var/www/inception
+      - ${PHP_CFG}:/etc/php81/php-fpm.d/www.conf
+      - ${PHP_DB}:/tmp/php
     depends_on:
-      - database
+      database :
+        condition: service_healthy
     links:
       - database
+    networks:
+      - inception-networks
+    restart: on-failure
+
   server:
     container_name: nginx
     build:
       context: ./nginx
       dockerfile: Dockerfile
+      args:
+        DOMAIN_NAME : ${DOMAIN_NAME}
+    volumes:
+      - ${PATH_DATA}/web_data:/var/www/inception
+      - ${CERTS}:/etc/nginx/certs
     ports:
-      - 80:80
       - 443:443
     links:
-      - webapp
+      - web_app
     restart: always
+    networks:
+      - inception-networks
   database:
     container_name: mariadb
     build:
       context: ./mariadb
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+    env_file:
+      - .env
     volumes:
-      - database:/var/lib/mysql
-      - ./db-data:/var/lib/mysql
+      - ${PATH_DATA}/database:/var/lib/mysql
+      - ${PATH_CFG}/my.cnf:/etc/my.cnf
+      - ${PATH_CFG}/mariadb-server.cnf:/etc/my.cnf.d/mariadb-server.cnf
+      - ${PATH_CFG}/install.sql:/tmp/install.sql
     restart: always
+    networks:
+      - inception-networks
+networks:
+  inception-networks:
+    driver: bridge
 
-volumes:
-  database:
-    name: wp_db
