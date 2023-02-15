@@ -113,10 +113,10 @@ $> echo DOCKER_NET
 192.168.48
 ```
 
-It is possible that our service is interrupted for some reason, to avoid a double installation of Wordpress that would prevent the restart of the service, we will check if wp-config does not exist, in this case we continue the installation steps
+It is possible that our service is interrupted for some reason, to avoid a double installation of Wordpress that would prevent the restart of the service, we will check if wp is installed, in this case we continue the installation steps
 
 ```bash
-if [ ! -f "./wp-config.php" ]; then 
+if [ ! wp core is-installed --path=$DIR_WP ] ; then
 ```
 
 The following line is divided into two parts, first we will use `eval` to replace the `environment variable` in `db.sql`, then we will send the output to our `database server` with the `MariaDB client`
