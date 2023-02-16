@@ -24,6 +24,11 @@ TITLE_WS=
 ADMIN_USER=
 ADMIN_PASS=
 ADMIN_EMAIL=
+
+# For Healthcheck php-fpm server
+SCRIPT_NAME=/ping
+SCRIPT_FILENAME=/ping
+REQUEST_METHOD=GET
 ```
 
 ## Dockerfile
@@ -41,6 +46,7 @@ We need to install `PHP` with somes packages and the `MariaDB Client` to easily 
  - `php81-mysqli` - allows you to access the functionality provided by MySQL
  - `php81-phar` - (PHP Archive) for easy distribution and installation
  - `mariadb-client` - for communicate with database
+ - `fcgi` - packages for comunicate with php-fpm server
 
 ```Dockerfile
 RUN set -eux ; \
@@ -214,3 +220,5 @@ FLUSH PRIVILEGES;
 [WP-CLI Documentation](https://wp-cli.org/)
 
 [Replace Env Var in SQL File](https://stackoverflow.com/questions/18725880/using-an-environment-variable-in-a-psql-script)
+
+[Connect to PHP-FPM directly](https://easyengine.io/tutorials/php/directly-connect-php-fpm/)
