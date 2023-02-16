@@ -19,6 +19,8 @@ RUN set -eux ; \
 		/var/run/nginx \
 		/var/www
 
+COPY config/wordpress.conf /etc/nginx/http.d
+
 RUN sed -i "s/DOMAIN_NAME/${DOMAIN_NAME}/g" /etc/nginx/http.d/wordpress.conf
 
 # Define non-root user
