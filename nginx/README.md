@@ -219,3 +219,15 @@ location ~ [^/]\.php(/|$) {
 	fastcgi_param  SCRIPT_FILENAME   $document_root$fastcgi_script_name;
 }
 ```
+
+## Ressources
+
+[Nginx Beginners Guide](https://nginx.org/en/docs/beginners_guide.html)
+
+[PHP FastCGI Example](https://www.nginx.com/resources/wiki/start/topics/examples/phpfcgi/)
+
+[How To Configure Nginx to use TLS 1.2 / 1.3 only](github.com/advisories/GHSA-hrpp-h998-j3pp)
+
+[How Properly Configure Nginx Server for TLS](https://hackernoon.com/how-properly-configure-nginx-server-for-tls-sg1d3udt)
+
+
