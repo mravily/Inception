@@ -65,6 +65,9 @@ restart: always
 When we use volumes, we always specify where we want to mount them 
 > [HOST] : [INSIDE_DOCKER]
 
+Be careful to mount the same volume as the one used by the Wordpress service, otherwise nginx will not be able to use the css files and display them correctly to the web client
+> Error Content-Type `text/html` instead of `text/css`.
+
 ```yaml
 volumes:
 	- ${PATH_DATA}/web_data:/var/www/inception
@@ -77,3 +80,57 @@ and finally the name of the network that docker creates for the LEMP environment
 networks:
 	- internal
 ````
+
+
+## Dockerfile
+
+Expose the port on which we will listen to the web traffic
+
+```Dockerfile
+EXPOSE 443
+```
+
+We will provide an argument, the domain name to our Dockerfile to replace in the nginx configuration file
+
+```Dockerfile
+ARG DOMAIN_NAME
+```
+
+Install the nginx package and remove the possibility to install other packages in the container
+
+```Dockerfile
+RUN set -eux ; \
+	apk update ; \
+	apk upgrade ; \
+	apk add --update --no-cache nginx ; \
+	rm -f /var/cache/apk/* 
+```
+
+Change ownership of directories used by nginx
+
+```Dockerfile 
+RUN set -eux ; \
+	chown -R nginx:nginx \
+		/etc/nginx/ \
+		/run/nginx \
+		/var/run/nginx \
+		/var/www
+```
+
+Replace DOMAIN_NAME in the nginx configuration file with our 
+
+```Dockerfile
+RUN sed -i "s/DOMAIN_NAME/${DOMAIN_NAME}/g" /etc/nginx/http.d/wordpress.conf
+```
+
+User change during execution 
+
+```Dockerfile
+USER nginx
+````
+
+Start the nginx process as the main process
+
+```Dockerfile
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+```
