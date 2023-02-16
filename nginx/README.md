@@ -6,7 +6,6 @@ This container will run `Nginx server` intercept all HTTP requests from `Web Cli
 ```bash
 DOMAIN_NAME="your-domain" 	# mravily.42.fr
 CERTS="/path/to/certs" 	# ./nginx/certs
-NGINX_CFG="=/path/to/nginx/config"	#./nginx/config
 ```
 ## Docker compose
 The nginx service declaration is divided into two parts:
@@ -115,6 +114,11 @@ RUN set -eux ; \
 		/run/nginx \
 		/var/run/nginx \
 		/var/www
+```
+Copy config file in the right directory
+
+```Dockerfile
+COPY config/wordpress.conf /etc/nginx/http.d
 ```
 
 Replace DOMAIN_NAME in the nginx configuration file with our 
