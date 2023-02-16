@@ -2,7 +2,7 @@
 
 export DOCKER_NET=$(awk 'END{print $1}' /etc/hosts | awk -F  '.' '{ print $1"."$2"."$3;}')
 
-if [ ! wp core is-installed --path=$DIR_WP ] ; then
+if ! wp core is-installed --path=$DIR_WP --quiet ; then
 
 	# Interpret env vars in the file and send it to the database
 	eval "echo \"$(cat /tmp/php/db.sql)\"" | mysql -u $DB_ADMIN -h $DB_HOST --password=$DB_ADMIN_PASS
@@ -29,11 +29,14 @@ if [ ! wp core is-installed --path=$DIR_WP ] ; then
 		--admin_email=$ADMIN_EMAIL \
 		--skip-email
 
-	# Install 
-	wp theme install --path=$DIR_WP twentytwenty --activate
-	
 	# Import Wordpress Database
-	# mysql -u "$DB_USER" -h $DB_HOST -p $DB_NAME --password="$DB_PASS" < /tmp/php/wordpress.sql
+	mysql -u "$DB_USER" -h $DB_HOST -p $DB_NAME --password="$DB_PASS" < /tmp/php/wordpress.sql
+fi
+
+
+# Install theme if not install
+if ! wp theme is-installed twentytwenty --path=$DIR_WP ; then
+	wp theme install --path=$DIR_WP twentytwenty --activate
 fi
 
 exec /usr/sbin/php-fpm81 -F
