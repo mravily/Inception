@@ -12,6 +12,7 @@ RUN set -eux ; \
 		php81-mbstring \
 		php81-phar \
 		mariadb-client \
+		fcgi \
 	rm -rf /var/lib/apt/lists/*
 
 # Download and config wp-cli binary
