@@ -134,3 +134,88 @@ Start the nginx process as the main process
 ```Dockerfile
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
 ```
+
+
+## Config File Nginx
+
+In order for nginx to understand that we have a website, we need to write a configuration file in which we specify some directives
+
+Which context to use? In our case, we use the server context
+
+```
+server {
+```
+
+Set the port, on wich the server will accept requests, with protocols
+
+```
+listen 443 ssl http2;
+listen [::]:443 ssl http2;
+````
+
+the `server_name` directive lists all server name
+
+```
+server_name DOMAIN_NAME;
+```
+
+We have implemented several SSL protocols for better encryption of communications, you will find a link in the resources section for more explanations
+
+```
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_certificate /etc/nginx/certs/cert.pem;
+ssl_certificate_key /etc/nginx/certs/key.pem;
+ssl_prefer_server_ciphers on;
+ssl_ciphers ECDH+AESGCM:ECDH+AES256-CBC:ECDH+AES128-CBC:DH+3DES:!ADH:!AECDH:!MD5;
+ssl_dhparam /etc/nginx/certs/dhparam.pem;
+ssl_trusted_certificate /etc/nginx/certs/cert.pem;
+add_header Strict-Transport-Security "max-age=31536000" always;
+ssl_session_timeout 4h;
+ssl_session_tickets on;
+```
+
+Sets the root directory for requests
+
+```
+root /var/www/inception;
+```
+
+Specify the index used, in our case we use the index.php of wordpress
+
+```
+index  index.php;
+````
+
+Checks the existence of files or directory in the specified order and uses the first found file for request processing
+
+```
+location / {
+	try_files $uri $uri/ /index.php$is_args$args;
+}
+```
+
+Now we must tell NGINX to proxy requests to PHP FPM via the FCGI protocol
+
+```
+location ~ [^/]\.php(/|$) {
+	fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+	if (!-f $document_root$fastcgi_script_name) {
+		return 404;
+	}
+
+	# Mitigate https://httpoxy.org/ vulnerabilities
+	fastcgi_param HTTP_PROXY "";
+
+	fastcgi_pass web_app:9000;
+	fastcgi_index index.php;
+
+	# include the fastcgi_param setting
+	include fastcgi_params;
+
+	# SCRIPT_FILENAME parameter is used for PHP FPM determining
+	#  the script name. If it is not set in fastcgi_params file,
+	# i.e. /etc/nginx/fastcgi_params or in the parent contexts,
+	# please comment off following line:
+	fastcgi_param  SCRIPT_FILENAME   $document_root$fastcgi_script_name;
+}
+```
