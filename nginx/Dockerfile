@@ -1,32 +1,31 @@
 FROM alpine:3.17
 
-EXPOSE 80 443
+EXPOSE 443
 
-RUN apk update && \
-	apk upgrade && \
-	apk add openssl curl ca-certificates
+ARG DOMAIN_NAME
 
-RUN curl -o /tmp/nginx_signing.rsa.pub https://nginx.org/keys/nginx_signing.rsa.pub
+# Install nginx and open ssl deps 
+RUN set -eux ; \
+	apk update ; \
+	apk upgrade ; \
+	apk add --update --no-cache nginx ; \
+	rm -f /var/cache/apk/* 
 
-RUN mv /tmp/nginx_signing.rsa.pub /etc/apk/keys/
+# Change owner nginx directory
+RUN set -eux ; \
+	chown -R nginx:nginx \
+		/etc/nginx/ \
+		/run/nginx \
+		/var/run/nginx \
+		/var/www
 
-RUN apk add nginx
+# Copy config file 
+COPY config/wordpress.conf /etc/nginx/http.d
 
-RUN mkdir /etc/nginx/certs && \
-	openssl req \
-		-x509 \
-		-newkey rsa:2048 \
-		-keyout /etc/nginx/certs/key.pem \
-		-out /etc/nginx/certs/cert.pem \
-		-days 365 \
-		-nodes \
-		 -subj '/ST=France/L=Paris/O=42/CN=webserver'
+# Replace with right domaine name
+RUN sed -i "s/DOMAIN_NAME/${DOMAIN_NAME}/g" /etc/nginx/http.d/wordpress.conf
 
-RUN openssl dhparam -out /etc/nginx/certs/dhparam.pem 2048
-
-COPY config/default.conf /etc/nginx/http.d/default.conf
-COPY config/wordpress.conf /etc/nginx/http.d/wordpress.conf
-
-RUN mkdir -p /data/www
+# Define non-root user
+USER nginx
 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

@@ -2,33 +2,34 @@ FROM alpine:3.17
 
 EXPOSE 9000
 
-RUN adduser -u 82 -D -S -G www-data www-data
+# Install dependencies for php-fpm and mariadb client
+RUN set -eux ; \
+	apk update ; \
+	apk upgrade ; \
+	apk add --update --no-cache curl php81 \
+		php81-fpm \
+		php81-mysqli \
+		php81-mbstring \
+		php81-phar \
+		mariadb-client \
+		fcgi \
+	rm -rf /var/lib/apt/lists/*
 
-RUN apk update && \
-	apk upgrade && \
-	apk add php81 php81-mysqli php81-fpm php81-curl php81-dom \
-	php81-exif php81-fileinfo php81-mbstring \
-	php81-openssl php81-zip  php81-opcache php81-gd php81-intl \
-	php81-cgi 
+# Download and config wp-cli binary
+RUN set -eux ; \
+	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar ; \
+	chmod +x wp-cli.phar ; \
+	mv wp-cli.phar /usr/local/bin/wp 
 
-RUN mkdir -p /usr/share/webapps/
+# Create user for php
+RUN set -eux ; \
+	adduser -u 82 -D -S -G www-data www-data ; \	
+	chown -R www-data:www-data /etc/php81 /var/log/php81
 
-RUN wget -O /usr/share/webapps/latest.tar.gz http://wordpress.org/latest.tar.gz
+COPY tools/entrypoint.sh /
 
-# Copy the .conf in the html directory
-COPY config/www.conf /etc/php81/php-fpm.d/
+USER www-data
 
-WORKDIR /usr/share/webapps/
+WORKDIR ${DIR_WP}
 
-RUN tar -xzvf latest.tar.gz && \
-	rm latest.tar.gz
-
-RUN chown -R www-data:www-data /usr/share/webapps/wordpress && \
-	chmod -R o-rwx /usr/share/webapps/wordpress
-
-WORKDIR /usr/share/webapps/wordpress
-
-COPY config/wp-config.php .
-
-#Launch PHP FPM in foreground and ignore deamonize from conf file (-F)
-# CMD ["/usr/sbin/php-fpm81", "-F"]
+ENTRYPOINT [ "/bin/sh", "/entrypoint.sh" ]
