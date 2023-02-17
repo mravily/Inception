@@ -18,7 +18,7 @@ The default domain name used during development is the following, if you use ano
 DOMAIN_NAME="mravily.42.fr"
 ```
 
-## Start the project
+## Start project
 
 To launch the project, you have to fill in the env_example file, if you want to launch it in its default configuration, you can use the paths in comments, you will only have to indicate a path where the data of your machines will be stored, the user name and the password... 
 
@@ -53,10 +53,11 @@ Be patient while the services are launched in turn
 [ OK ] Ready to use 🍻
 ```
 
-### Disclaimer
-Ce projet est à but pédagogique, il ne peut pas être utilisé en production.
+## Disclaimer
 
-### Ressources 
+This project is for educational purposes, it cannot be used in production.
+
+## Ressources 
 
 [Best practices for building containers](https://cloud.google.com/architecture/best-practices-for-building-containers#remove_unnecessary_tools)
 
