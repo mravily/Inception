@@ -80,7 +80,6 @@ networks:
 	- internal
 ````
 
-
 ## Dockerfile
 
 Expose the port on which we will listen to the web traffic
