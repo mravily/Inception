@@ -1,15 +1,24 @@
-FROM debian:buster
+FROM alpine:3.17
 
 EXPOSE 3306
 
+# Install MariaDB dependencies 
 RUN set -eax ; \
-	apt update ; \
-	apt -y upgrade ; \
-	apt -y install mariadb-server; \
-	rm -rf /var/lib/apt/lists/*
+	apk update ; \
+	apk upgrade ; \
+	apk add --update --no-cache mariadb \
+	mariadb-common \
+	mariadb-client \
+    rm -rf /var/lib/apt/lists/*
 
-COPY config/my.cnf /etc/mysql/
+# Create folders and change rights for mysql user
+RUN set -eax ; \
+	mkdir -p /run/mysqld /tmp/mysql ;\
+	chown -R mysql:mysql /etc/mysql /run/mysqld /var/lib/mysql \
+    /usr/lib/mariadb /tmp/mysql /usr/bin/ /etc/my.cnf
 
-COPY config/entrypoint.sh /
+COPY tools/entrypoint.sh /
+
+USER mysql
 
 ENTRYPOINT [ "/bin/sh", "entrypoint.sh" ]
