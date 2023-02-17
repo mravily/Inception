@@ -5,6 +5,8 @@ services:
     build:
       context: ./wordpress
       dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD", "cgi-fcgi", "-bind", "-connect", "127.0.0.1:9000${DIR_WP}" ]
     env_file:
       - .env
     volumes:
@@ -14,10 +16,8 @@ services:
     depends_on:
       database :
         condition: service_healthy
-    links:
-      - database
     networks:
-      - inception-networks
+      - internal
     restart: on-failure
 
   server:
@@ -27,23 +27,23 @@ services:
       dockerfile: Dockerfile
       args:
         DOMAIN_NAME : ${DOMAIN_NAME}
+    depends_on:
+      web_app :
+        condition: service_healthy
+    ports:
+      - 443:443
+    restart: always
     volumes:
       - ${PATH_DATA}/web_data:/var/www/inception
       - ${CERTS}:/etc/nginx/certs
-    ports:
-      - 443:443
-    links:
-      - web_app
-    restart: always
     networks:
-      - inception-networks
+      - internal
+
   database:
     container_name: mariadb
     build:
       context: ./mariadb
       dockerfile: Dockerfile
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
     env_file:
       - .env
     volumes:
@@ -51,10 +51,12 @@ services:
       - ${PATH_CFG}/my.cnf:/etc/my.cnf
       - ${PATH_CFG}/mariadb-server.cnf:/etc/my.cnf.d/mariadb-server.cnf
       - ${PATH_CFG}/install.sql:/tmp/install.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
     restart: always
     networks:
-      - inception-networks
-networks:
-  inception-networks:
-    driver: bridge
+      - internal
 
+networks:
+  internal:
+    driver: bridge
