@@ -17,8 +17,10 @@ RUN set -eax ; \
 	chown -R mysql:mysql /etc/mysql /run/mysqld /var/lib/mysql \
     /usr/lib/mariadb /tmp/mysql /usr/bin/ /etc/my.cnf
 
+# Copy config file
 COPY tools/entrypoint.sh /
 
+# Change main user
 USER mysql
 
 ENTRYPOINT [ "/bin/sh", "entrypoint.sh" ]
