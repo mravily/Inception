@@ -119,3 +119,13 @@ Lauch the config script and start the `MariaDB Deamon`
 ENTRYPOINT [ "/bin/sh", "entrypoint.sh" ]
 ````
 
+## Ressources
+
+[Beginner's Guide MariaDB](https://www.fosslinux.com/category/mariadb)
+
+[Automating `mysql_secure_installation`](https://bertvv.github.io/notes-to-self/2015/11/16/automating-mysql_secure_installation/)
+
+[Official MariaDB Docs](https://mariadb.com/kb/en/documentation/)
+
+[MySQL Tutorial](https://www.mysqltutorial.org/)
+
